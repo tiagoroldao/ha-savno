@@ -8,5 +8,5 @@
   "documentation": "https://github.com/tiagoroldao/savno_home_assistant_component#",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/tiagoroldao/savno_home_assistant_component#/issues",
-  "version": "0.1.0"
+  "version": "1.0.0"
 }
