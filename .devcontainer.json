@@ -1,13 +1,21 @@
 {
-    "name": "ludeeus/integration_blueprint",
+    "name": "savno",
     "image": "mcr.microsoft.com/devcontainers/python:3.13",
     "postCreateCommand": "scripts/setup",
     "forwardPorts": [
-        8123
+        8123,
+        1883
+    ],
+    "runArgs": [
+        "--network=host"
     ],
     "portsAttributes": {
         "8123": {
             "label": "Home Assistant",
+            "onAutoForward": "notify"
+        },
+        "1883": {
+            "label": "MQTT",
             "onAutoForward": "notify"
         }
     },

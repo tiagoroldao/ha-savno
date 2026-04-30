@@ -1,12 +1,12 @@
 {
-  "domain": "integration_blueprint",
-  "name": "Integration blueprint",
+  "domain": "savno",
+  "name": "SAVNO Collection Information",
   "codeowners": [
-    "@ludeeus"
+    "@tiagoroldao"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/ludeeus/integration_blueprint",
+  "documentation": "https://github.com/tiagoroldao/savno_home_assistant_component#",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/ludeeus/integration_blueprint/issues",
+  "issue_tracker": "https://github.com/tiagoroldao/savno_home_assistant_component#/issues",
   "version": "0.1.0"
 }

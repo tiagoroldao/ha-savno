@@ -1,8 +1,8 @@
-"""Constants for integration_blueprint."""
+"""Constants for the SAVNO integration."""
 
-from logging import Logger, getLogger
+DOMAIN = "savno"
 
-LOGGER: Logger = getLogger(__package__)
+SAVNO_HOST = "https://appadmin.savnoservizi.it"
 
-DOMAIN = "integration_blueprint"
-ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
+DEFAULT_SCAN_INTERVAL = 8640
+MIN_SCAN_INTERVAL = 360

@@ -1,78 +1,76 @@
-"""
-Custom integration to integrate integration_blueprint with Home Assistant.
+"""The SAVNO integration."""
 
-For more details about this integration, please refer to
-https://github.com/ludeeus/integration_blueprint
-"""
+from dataclasses import dataclass
 
-from __future__ import annotations
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntry
 
-from datetime import timedelta
-from typing import TYPE_CHECKING
+from .coordinator import SavnoCoordinator
 
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.loader import async_get_loaded_integration
+PLATFORMS: list[Platform] = [Platform.SENSOR]
 
-from .api import IntegrationBlueprintApiClient
-from .const import DOMAIN, LOGGER
-from .coordinator import BlueprintDataUpdateCoordinator
-from .data import IntegrationBlueprintData
-
-if TYPE_CHECKING:
-    from homeassistant.core import HomeAssistant
-
-    from .data import IntegrationBlueprintConfigEntry
-
-PLATFORMS: list[Platform] = [
-    Platform.SENSOR,
-    Platform.BINARY_SENSOR,
-    Platform.SWITCH,
-]
+type SavnoConfigEntry = ConfigEntry[RuntimeData]
 
 
-# https://developers.home-assistant.io/docs/config_entries_index/#setting-up-an-entry
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: IntegrationBlueprintConfigEntry,
-) -> bool:
-    """Set up this integration using UI."""
-    coordinator = BlueprintDataUpdateCoordinator(
-        hass=hass,
-        logger=LOGGER,
-        name=DOMAIN,
-        update_interval=timedelta(hours=1),
-    )
-    entry.runtime_data = IntegrationBlueprintData(
-        client=IntegrationBlueprintApiClient(
-            username=entry.data[CONF_USERNAME],
-            password=entry.data[CONF_PASSWORD],
-            session=async_get_clientsession(hass),
-        ),
-        integration=async_get_loaded_integration(hass, entry.domain),
-        coordinator=coordinator,
-    )
+@dataclass
+class RuntimeData:
+    """Class to hold your data."""
 
-    # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
+    coordinator: SavnoCoordinator
+
+
+async def async_setup_entry(hass: HomeAssistant, config_entry: SavnoConfigEntry):
+    """Set up entry."""
+
+    coordinator = SavnoCoordinator(hass, config_entry)
+
     await coordinator.async_config_entry_first_refresh()
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+    # Initialise a listener for config flow options changes.
+    # This will be removed automatically if the integraiton is unloaded.
+    # See config_flow for defining an options setting that shows up as configure
+    # on the integration.
+    # If you do not want any config flow options, no need to have listener.
+    config_entry.async_on_unload(
+        config_entry.add_update_listener(_async_update_listener)
+    )
 
+    # Add the coordinator and update listener to config runtime data to make
+    # accessible throughout your integration
+    config_entry.runtime_data = RuntimeData(coordinator)
+
+    # Setup platforms (based on the list of entity types in PLATFORMS defined above)
+    # This calls the async_setup method in each of your entity type files.
+    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
+
+    # Return true to denote a successful setup.
+    return True
+
+
+async def _async_update_listener(hass: HomeAssistant, config_entry) -> None:
+    """Handle config options update."""
+    # Reload the integration when the options change.
+    await hass.config_entries.async_reload(config_entry.entry_id)
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, config_entry: ConfigEntry, device_entry: DeviceEntry
+) -> bool:
+    """Delete device if selected from UI."""
+    # Adding this function shows the delete device option in the UI.
+    # Remove this function if you do not want that option.
+    # You may need to do some checks here before allowing devices to be removed.
     return True
 
 
 async def async_unload_entry(
-    hass: HomeAssistant,
-    entry: IntegrationBlueprintConfigEntry,
+    hass: HomeAssistant, config_entry: SavnoConfigEntry
 ) -> bool:
-    """Handle removal of an entry."""
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    """Unload a config entry."""
+    # This is called when you remove your integration or shutdown HA.
+    # If you have created any custom services, they need to be removed here too.
 
-
-async def async_reload_entry(
-    hass: HomeAssistant,
-    entry: IntegrationBlueprintConfigEntry,
-) -> None:
-    """Reload config entry."""
-    await hass.config_entries.async_reload(entry.entry_id)
+    # Unload platforms and return result
+    return await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)

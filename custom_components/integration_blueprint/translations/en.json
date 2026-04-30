@@ -1,21 +1,21 @@
 {
     "config": {
         "step": {
-            "user": {
-                "description": "If you need help with the configuration have a look here: https://github.com/ludeeus/integration_blueprint",
+            "istat": {
+                "description": "SAVNO collection data.",
                 "data": {
-                    "username": "Username",
-                    "password": "Password"
+                    "istat_code": "District"
+                }
+            },
+            "zone": {
+                "description": "SAVNO collection data.",
+                "data": {
+                    "zone": "Zone"
                 }
             }
         },
-        "error": {
-            "auth": "Username/Password is wrong.",
-            "connection": "Unable to connect to the server.",
-            "unknown": "Unknown error occurred."
-        },
         "abort": {
-            "already_configured": "This entry is already configured."
+            "already_configured": "An entry already exists for this District and Zone combnation."
         }
     }
 }
