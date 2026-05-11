@@ -44,6 +44,7 @@ class TrashCollectionSensor(CoordinatorEntity[SavnoCoordinator], SensorEntity):
     ) -> None:
         """Initialise sensor."""
         super().__init__(coordinator)
+        self._attr_has_entity_name = True
         self.trash_data = trash_data
         self.trash_type = trash_data.trash_type
         self.istat_code = trash_data.istat_code
@@ -105,5 +106,5 @@ class TrashCollectionSensor(CoordinatorEntity[SavnoCoordinator], SensorEntity):
         """Return the extra state attributes."""
         # Add any additional attributes you want on your sensor.
         attrs = {}
-        attrs["extra_info"] = "Extra Info"
+        attrs["trash_data"] = self.trash_data
         return attrs
