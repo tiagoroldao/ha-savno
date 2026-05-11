@@ -65,21 +65,10 @@ class TrashCollectionSensor(CoordinatorEntity[SavnoCoordinator], SensorEntity):
         # https://developers.home-assistant.io/docs/core/entity/sensor/#available-device-classes
         return SensorDeviceClass.DATE
 
-    # @property
-    # def device_info(self) -> DeviceInfo:
-    #     """Return device information."""
-    #     # Identifiers are what group entities into the same device.
-    #     # If your device is created elsewhere, you can just specify the indentifiers parameter.
-    #     # If your device connects via another device, add via_device parameter with the indentifiers of that device.
-    #     return DeviceInfo(
-    #         translation_key="n_ch_power_strip",
-    #         translation_placeholders={"number_of_sockets": "2"},
-    #     )
-
     @property
     def name(self) -> str:
         """Return the name of the sensor."""
-        return self.trash_type
+        return f"Trash Collection {self.trash_type} ({self.istat_code} - {self.zone or 'default'})"
 
     @property
     def native_value(self) -> date | None:
@@ -99,7 +88,7 @@ class TrashCollectionSensor(CoordinatorEntity[SavnoCoordinator], SensorEntity):
         """Return unique id."""
         # All entities must have a unique id.  Think carefully what you want this to be as
         # changing it later will cause HA to create new entities.
-        return f"{DOMAIN}-{self.istat_code}-{self.zone}-{self.trash_type}"
+        return f"{DOMAIN}-{self.istat_code}-{self.zone or 'default'}-{self.trash_type}"
 
     @property
     def extra_state_attributes(self) -> dict:

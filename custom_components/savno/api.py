@@ -32,11 +32,18 @@ class TrashCollectionResponseItem:
 
 @dataclass
 class TrashCollectionDistrictInfo:
-    """District info, including istat_code (used for filtering collection data) and a list of available zones."""
+    """
+    District info.
+
+    including istat_code (used for filtering collection data)
+    and a list of available zones.
+    """
 
     istat_code: str
     name: str
     zones: list[str]
+    id: str
+    slug: str
 
 
 class SavnoAPIError(Exception):
@@ -94,12 +101,22 @@ class SavnoAPI:
         )
 
     async def get_district_and_zone_data(self) -> list[TrashCollectionDistrictInfo]:
-        """Get a list of available Disctricts and their zones."""
+        """Get a list of available Districts and their zones."""
         json = await self._api_wrapper(
             method="post",
             url=f"{self._host}/graphql",
             data={
-                "query": "query getRaccolte($filters: FilterRaccoltaInput!) {raccolte(filters: $filters) {date, types}}",
+                "query": """
+                    query getUpdateQuery {
+                        comuni {
+                            id
+                            istat_code
+                            name
+                            slug
+                            zones
+                        }
+                    }
+                """,
             },
         )
         return [
@@ -115,7 +132,11 @@ class SavnoAPI:
             method="post",
             url=f"{self._host}/graphql",
             data={
-                "query": "query getRaccolte($filters: FilterRaccoltaInput!) {raccolte(filters: $filters) {date, types}}",
+                "query": """
+                    query getRaccolte($filters: FilterRaccoltaInput!) {
+                        raccolte(filters: $filters) {date, types}
+                    }
+                """,
                 "variables": {
                     "filters": {
                         "istat_code": istat_code,
